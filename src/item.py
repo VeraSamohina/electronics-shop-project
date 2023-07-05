@@ -22,10 +22,31 @@ class Item:
         self.all.append(self)
 
     def __repr__(self):
+        """
+        Вывод информации о товаре.
+        :return: Строка с информацией о товаре.
+        """
+
         return f"{self.__class__.__name__}('{self.name}', {self.price}, {self.quantity})"
 
     def __str__(self):
+        """
+        Преобразование экземпляра класса item в строку.
+        """
+
         return self.__name
+
+    def __add__(self, other):
+        """
+        Сложение двух экземпляров класса Item(и дочерних).
+
+        :param other: Экземпляр класса Item.
+        :return: Количество двух экземпляров класса Item.
+
+        """
+        if isinstance(other, Item):
+            return self.quantity + other.quantity
+        raise ValueError('Складывать можно только объекты Item и дочерние от них.')
 
     @property
     def name(self):
@@ -41,16 +62,24 @@ class Item:
 
     @staticmethod
     def string_to_number(value):
+        """
+        Преобразование строки в целое число.
+        :param value: Строка.
+        :return: целое число.
+        """
         value = int(float(value))
         return value
 
     @classmethod
     def instantiate_from_csv(cls):
+        """
+        Создание экземпляров класса Item из файла.
+        """
         Item.all.clear()
         with open('../src/items.csv', newline='') as csvfile:
             reader = csv.DictReader(csvfile, fieldnames=None, restkey=None, restval=None, dialect='excel')
             for row in reader:
-                item = Item(row['name'], Item.string_to_number(row['price']), Item.string_to_number(row['quantity']))
+                Item(row['name'], Item.string_to_number(row['price']), Item.string_to_number(row['quantity']))
 
     def calculate_total_price(self) -> float:
         """
