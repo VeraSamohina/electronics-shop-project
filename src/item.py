@@ -1,4 +1,13 @@
 import csv
+import os.path
+
+
+class InstantiateCSVError(Exception):
+    """
+    Класс для исключения при инициализации CSV-файла
+    """
+    def __init__(self, *args) -> None:
+        self.message = args[0] if args else None
 
 
 class Item:
@@ -27,23 +36,19 @@ class Item:
         Вывод информации о товаре.
         :return: Строка с информацией о товаре.
         """
-
         return f"{self.__class__.__name__}('{self.name}', {self.price}, {self.quantity})"
 
     def __str__(self):
         """
         Преобразование экземпляра класса item в строку.
         """
-
         return self.__name
 
     def __add__(self, other):
         """
         Сложение двух экземпляров класса Item(и дочерних).
-
         :param other: Экземпляр класса Item.
         :return: Количество двух экземпляров класса Item.
-
         """
         if isinstance(other, Item):
             return self.quantity + other.quantity
@@ -72,20 +77,26 @@ class Item:
         return value
 
     @classmethod
-    def instantiate_from_csv(cls):
+    def instantiate_from_csv(cls, path_file_name):
         """
         Создание экземпляров класса Item из файла.
         """
         Item.all.clear()
-        with open('../src/items.csv', newline='') as csvfile:
-            reader = csv.DictReader(csvfile, fieldnames=None, restkey=None, restval=None, dialect='excel')
+        if os.path.exists(path_file_name):
+            csvfile = open(path_file_name, newline='')
+            reader = csv.DictReader(csvfile, fieldnames=None, dialect='excel')
+        else:
+            raise FileNotFoundError('Отсутствует файл items.csv')
+        if len(reader.fieldnames) != 3:
+            raise InstantiateCSVError('Файл items.csv поврежден')
+        else:
             for row in reader:
                 Item(row['name'], Item.string_to_number(row['price']), Item.string_to_number(row['quantity']))
+            csvfile.close()
 
     def calculate_total_price(self) -> float:
         """
         Рассчитывает общую стоимость конкретного товара в магазине.
-
         :return: Общая стоимость товара.
         """
         return self.price * self.quantity

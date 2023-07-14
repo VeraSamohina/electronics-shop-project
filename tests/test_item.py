@@ -1,4 +1,4 @@
-from src.item import Item
+from src.item import Item, InstantiateCSVError
 from src.phone import Phone
 import pytest
 
@@ -32,8 +32,12 @@ def test_item_name():
 
 
 def test_instantiate_from_csv():
-    Item.instantiate_from_csv()  # создание объектов из данных файла
+    Item.instantiate_from_csv('../src/items.csv')  # создание объектов из данных файла
     assert len(Item.all) == 5  # в файле 5 записей с данными по товарам
+    with pytest.raises(FileNotFoundError):
+        Item.instantiate_from_csv('../src/items3.csv')
+    with pytest.raises(InstantiateCSVError):
+        Item.instantiate_from_csv('../src/items-fail.csv')
 
 
 def test_repr():
